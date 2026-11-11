@@ -3,32 +3,42 @@ package net.sumik.sync.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.sumik.sync.client.render.block.entity.ShellConstructorBlockEntityRenderer;
 import net.sumik.sync.client.render.block.entity.ShellStorageBlockEntityRenderer;
 import net.sumik.sync.client.render.block.entity.TreadmillBlockEntityRenderer;
 import net.sumik.sync.common.block.entity.SyncBlockEntities;
+import net.sumik.sync.common.block.SyncBlocks;
+import net.sumik.sync.common.item.SyncItems;
 
 @OnlyIn(Dist.CLIENT)
 public final class SyncRenderers {
     public static void initClient() {
-        register(ShellStorageBlockEntityRenderer::new, SyncBlockEntities.SHELL_STORAGE.get());
-        register(ShellConstructorBlockEntityRenderer::new, SyncBlockEntities.SHELL_CONSTRUCTOR.get());
-        register(TreadmillBlockEntityRenderer::new, SyncBlockEntities.TREADMILL.get());
     }
 
-    private static <E extends BlockEntity> void register(BlockEntityRendererProvider<E> rendererFactory, BlockEntityType<E> blockEntityType) {
-        BlockEntityRenderers.register(blockEntityType, rendererFactory);
+    public static void registerBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(SyncBlockEntities.SHELL_STORAGE.get(), ShellStorageBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(SyncBlockEntities.SHELL_CONSTRUCTOR.get(), ShellConstructorBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(SyncBlockEntities.TREADMILL.get(), TreadmillBlockEntityRenderer::new);
+    }
+
+    public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerItem(createItemRenderer(SyncBlockEntities.SHELL_STORAGE.get(), SyncBlocks.SHELL_STORAGE.get()),
+                SyncItems.SHELL_STORAGE.get());
+        event.registerItem(createItemRenderer(SyncBlockEntities.SHELL_CONSTRUCTOR.get(), SyncBlocks.SHELL_CONSTRUCTOR.get()),
+                SyncItems.SHELL_CONSTRUCTOR.get());
+        event.registerItem(createItemRenderer(SyncBlockEntities.TREADMILL.get(), SyncBlocks.TREADMILL.get()),
+                SyncItems.TREADMILL.get());
     }
 
     /**

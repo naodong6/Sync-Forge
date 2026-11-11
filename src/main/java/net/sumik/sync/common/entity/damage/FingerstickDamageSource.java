@@ -12,7 +12,7 @@ import net.sumik.sync.Sync;
 public class FingerstickDamageSource {
     public static final ResourceKey<DamageType> FINGERSTICK = ResourceKey.create(
             Registries.DAMAGE_TYPE,
-            new ResourceLocation(Sync.MOD_ID, "fingerstick")
+            ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "fingerstick")
     );
 
     public static DamageSource fingerstick(Level world) {

@@ -18,15 +18,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.sumik.sync.common.utils.BlockPosUtil;
 
 public class ShellStorageBlockEntity extends AbstractShellContainerBlockEntity implements IEnergyStorage {
@@ -34,13 +33,11 @@ public class ShellStorageBlockEntity extends AbstractShellContainerBlockEntity i
     private int ticksWithoutPower;
     private int storedEnergy;
     private final BooleanAnimator connectorAnimator;
-    private LazyOptional<IEnergyStorage> energyHandler;
 
     public ShellStorageBlockEntity(BlockPos pos, BlockState state) {
         super(SyncBlockEntities.SHELL_STORAGE.get(), pos, state);
         this.entityState = EntityState.NONE;
         this.connectorAnimator = new BooleanAnimator(false);
-        this.energyHandler = LazyOptional.of(() -> this);
     }
 
     public DyeColor getIndicatorColor() {
@@ -185,38 +182,15 @@ public class ShellStorageBlockEntity extends AbstractShellContainerBlockEntity i
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ShellStateContainer.CAPABILITY) {
-            return LazyOptional.of(() -> (T) this);
-        }
-        if (cap == ForgeCapabilities.ENERGY && this.canReceive()) {
-            return this.energyHandler.cast();
-        }
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        this.energyHandler.invalidate();
-    }
-
-    @Override
-    public void reviveCaps() {
-        super.reviveCaps();
-        this.energyHandler = LazyOptional.of(() -> this);
-    }
-
-    @Override
-    protected void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         nbt.putInt("storedEnergy", this.storedEnergy);
         nbt.putInt("ticksWithoutPower", this.ticksWithoutPower);
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
         this.storedEnergy = nbt.getInt("storedEnergy");
         this.ticksWithoutPower = nbt.getInt("ticksWithoutPower");
     }

@@ -5,8 +5,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.Sync;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.client.model.AbstractShellContainerModel;
@@ -18,7 +18,7 @@ import net.sumik.sync.common.block.entity.ShellEntity;
 
 @OnlyIn(Dist.CLIENT)
 public class ShellStorageBlockEntityRenderer extends AbstractShellContainerBlockEntityRenderer<ShellStorageBlockEntity> {
-    private static final ResourceLocation SHELL_STORAGE_TEXTURE_ID = new ResourceLocation(Sync.MOD_ID, "textures/block/shell_storage.png");
+    private static final ResourceLocation SHELL_STORAGE_TEXTURE_ID = ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "textures/block/shell_storage.png");
     private static final BlockState DEFAULT_STATE = SyncBlocks.SHELL_STORAGE.get().defaultBlockState()
             .setValue(AbstractShellContainerBlock.HALF, DoubleBlockHalf.LOWER)
             .setValue(AbstractShellContainerBlock.FACING, Direction.SOUTH)

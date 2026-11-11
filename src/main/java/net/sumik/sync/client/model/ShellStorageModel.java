@@ -3,10 +3,11 @@ package net.sumik.sync.client.model;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ShellStorageModel extends AbstractShellContainerModel {
@@ -148,12 +149,12 @@ public class ShellStorageModel extends AbstractShellContainerModel {
     }
 
     @Override
-    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         this.headConnector.z = 10 - 5 * this.connectorProgress;
-        super.render(type, matrices, vertices, light, overlay, red, green, blue, alpha);
+        super.render(type, matrices, vertices, light, overlay, color);
         if (type == BOTTOM) {
-            float[] rgb = this.ledColor.getTextureDiffuseColors();
-            this.ledLight.render(matrices, vertices, light, overlay, rgb[0], rgb[1], rgb[2], 1F);
+            this.ledLight.render(matrices, vertices, light, overlay,
+                    FastColor.ARGB32.multiply(color, this.ledColor.getTextureDiffuseColor()));
         }
     }
 }

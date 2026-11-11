@@ -5,12 +5,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.sumik.sync.Sync;
+import net.sumik.sync.networking.SyncPackets;
 
 import java.util.UUID;
 
@@ -30,8 +32,13 @@ public class PlayerIsAlivePacket implements ClientPlayerPacket {
     }
 
     @Override
+    public CustomPacketPayload.Type<PlayerIsAlivePacket> type() {
+        return SyncPackets.PLAYER_IS_ALIVE;
+    }
+
+    @Override
     public ResourceLocation getId() {
-        return new ResourceLocation(Sync.MOD_ID, "packet.shell.alive");
+        return ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "packet.shell.alive");
     }
 
     @Override
@@ -46,7 +53,7 @@ public class PlayerIsAlivePacket implements ClientPlayerPacket {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, NetworkEvent.Context ctx) {
+    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, IPayloadContext ctx) {
         Player updatedPlayer = player.clientLevel.getPlayerByUUID(this.playerUuid);
         if (updatedPlayer != null) {
             if (updatedPlayer.getHealth() <= 0) {

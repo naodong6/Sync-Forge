@@ -7,13 +7,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.sumik.sync.Sync;
 import net.sumik.sync.api.shell.ClientShell;
 import net.sumik.sync.api.shell.ShellState;
+import net.sumik.sync.networking.SyncPackets;
 import org.jetbrains.annotations.Nullable;
 
 public class SynchronizationResponsePacket implements ClientPlayerPacket {
@@ -39,8 +41,13 @@ public class SynchronizationResponsePacket implements ClientPlayerPacket {
     }
 
     @Override
+    public CustomPacketPayload.Type<SynchronizationResponsePacket> type() {
+        return SyncPackets.SYNCHRONIZATION_RESPONSE;
+    }
+
+    @Override
     public ResourceLocation getId() {
-        return new ResourceLocation(Sync.MOD_ID, "packet.shell.synchronization.response");
+        return ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "packet.shell.synchronization.response");
     }
 
     @Override
@@ -77,7 +84,7 @@ public class SynchronizationResponsePacket implements ClientPlayerPacket {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, NetworkEvent.Context ctx) {
+    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, IPayloadContext ctx) {
         ((ClientShell)player).endSync(this.startWorld, this.startPos, this.startFacing,
                 this.targetWorld, this.targetPos, this.targetFacing,
                 this.storedState);

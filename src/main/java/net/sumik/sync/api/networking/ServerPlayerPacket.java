@@ -2,9 +2,10 @@ package net.sumik.sync.api.networking;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.sumik.sync.networking.SyncPackets;
 
 /**
@@ -26,23 +27,21 @@ public interface ServerPlayerPacket extends PlayerPacket {
      * @param player The player, who sent the packet from the client side.
      * @param ctx The network context.
      */
-    void execute(MinecraftServer server, ServerPlayer player, NetworkEvent.Context ctx);
+    void execute(MinecraftServer server, ServerPlayer player, IPayloadContext ctx);
 
     /**
      * Handles the packet on the server side.
      * @param ctx The network context.
      */
-    default void handle(NetworkEvent.Context ctx) {
-        if (ctx.getDirection().getReceptionSide().isServer()) {
-            ServerPlayer player = ctx.getSender();
+    default void handle(IPayloadContext ctx) {
+        if (ctx.flow() == PacketFlow.SERVERBOUND && ctx.player() instanceof ServerPlayer player) {
             MinecraftServer server = player.getServer();
 
             if (this.isBackgroundTask()) {
                 this.execute(server, player, ctx);
             } else {
-                server.execute(() -> this.execute(server, player, ctx));
+                ctx.enqueueWork(() -> this.execute(server, player, ctx));
             }
         }
-        ctx.setPacketHandled(true);
     }
 }

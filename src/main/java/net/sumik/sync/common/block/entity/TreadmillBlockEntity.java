@@ -2,6 +2,7 @@ package net.sumik.sync.common.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
@@ -18,15 +19,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.sumik.sync.api.event.EntityFitnessEvents;
 import net.sumik.sync.common.block.TreadmillBlock;
 import net.sumik.sync.common.config.SyncConfig;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.UUID;
@@ -36,8 +33,6 @@ public class TreadmillBlockEntity extends BlockEntity implements DoubleBlockEnti
     private static final int MAX_RUNNING_TIME = 20 * 60 * 15;
     private static final double MAX_SQUARED_DISTANCE = 0.5;
     private static final Map<EntityType<? extends Entity>, Long> ENERGY_MAP;
-
-    private final LazyOptional<IEnergyStorage> energyHandler = LazyOptional.of(() -> this);
 
     private UUID runnerUUID;
     private Integer runnerId;
@@ -242,15 +237,18 @@ public class TreadmillBlockEntity extends BlockEntity implements DoubleBlockEnti
 
         for (int i = 0; i < 2; ++i) {
             for (Direction direction : Direction.values()) {
-                BlockEntity be = world.getBlockEntity(pos.relative(direction));
+                BlockPos neighborPos = pos.relative(direction);
+                BlockEntity be = world.getBlockEntity(neighborPos);
                 if (be != null) {
-                    LazyOptional<IEnergyStorage> energyCap = be.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite());
-                    energyCap.ifPresent(storage -> {
+                    BlockState neighborState = world.getBlockState(neighborPos);
+                    IEnergyStorage storage = Capabilities.EnergyStorage.BLOCK.getCapability(
+                            world, neighborPos, neighborState, be, direction.getOpposite());
+                    if (storage != null) {
                         if (storage.canReceive()) {
                             int transferred = storage.receiveEnergy((int) back.storedEnergy, false);
                             back.storedEnergy -= transferred;
                         }
-                    });
+                    }
 
                     if (back.storedEnergy <= 0) {
                         return;
@@ -293,23 +291,15 @@ public class TreadmillBlockEntity extends BlockEntity implements DoubleBlockEnti
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
         return tag;
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        CompoundTag tag = pkt.getTag();
-        if (tag != null) {
-            load(tag);
-        }
-    }
-
-    @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
         this.runnerUUID = nbt.hasUUID("runner") ? nbt.getUUID("runner") : null;
         this.runnerId = nbt.contains("runnerId", Tag.TAG_INT) ? nbt.getInt("runnerId") : null;
         this.producibleEnergyQuantity = nbt.getLong("energy");
@@ -317,8 +307,8 @@ public class TreadmillBlockEntity extends BlockEntity implements DoubleBlockEnti
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         UUID runnerUuid = this.runnerUUID == null ? this.runner == null ? null : this.runner.getUUID() : this.runnerUUID;
         if (runnerUuid != null) {
             nbt.putUUID("runner", runnerUuid);
@@ -329,20 +319,6 @@ public class TreadmillBlockEntity extends BlockEntity implements DoubleBlockEnti
         }
         nbt.putLong("energy", this.producibleEnergyQuantity);
         nbt.putInt("time", this.runningTime);
-    }
-
-    @Override
-    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ENERGY) {
-            return energyHandler.cast();
-        }
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        energyHandler.invalidate();
     }
 
     private static Long getOutputEnergyQuantityForEntity(Entity entity, IEnergyStorage energyStorage) {

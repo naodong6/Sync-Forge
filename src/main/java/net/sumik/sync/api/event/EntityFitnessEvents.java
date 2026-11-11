@@ -1,7 +1,7 @@
 package net.sumik.sync.api.event;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

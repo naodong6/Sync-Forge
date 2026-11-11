@@ -13,8 +13,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.common.block.entity.ShellEntity;
 import net.sumik.sync.common.item.SimpleInventory;
 import net.sumik.sync.common.utils.WorldUtil;
@@ -288,7 +288,6 @@ public class ShellState {
         ItemEntity item = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), stack);
         item.setPickUpDelay(40);
         if (world instanceof ServerLevel) {
-            item.setThrower(this.getOwnerUuid());
         }
 
         float h = world.random.nextFloat() * 0.5F;

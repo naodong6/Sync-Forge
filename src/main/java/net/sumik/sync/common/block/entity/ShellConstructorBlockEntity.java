@@ -9,10 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.sumik.sync.api.event.PlayerSyncEvents;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.api.shell.ShellStateContainer;
@@ -21,12 +18,9 @@ import net.sumik.sync.common.block.ShellConstructorBlock;
 import net.sumik.sync.common.config.SyncConfig;
 import net.sumik.sync.common.entity.damage.FingerstickDamageSource;
 import net.sumik.sync.common.utils.BlockPosUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ShellConstructorBlockEntity extends AbstractShellContainerBlockEntity implements IEnergyStorage {
-    private final LazyOptional<IEnergyStorage> energyHandler = LazyOptional.of(() -> this);
-
     public ShellConstructorBlockEntity(BlockPos pos, BlockState state) {
         super(SyncBlockEntities.SHELL_CONSTRUCTOR.get(), pos, state);
     }
@@ -135,22 +129,4 @@ public class ShellConstructorBlockEntity extends AbstractShellContainerBlockEnti
         return true;
     }
 
-    @Override
-    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ENERGY) {
-            return energyHandler.cast();
-        }
-        if (cap == ShellStateContainer.CAPABILITY) {
-            if (AbstractShellContainerBlock.isBottom(this.getBlockState())) {
-                return LazyOptional.of(() -> this).cast();
-            }
-        }
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        energyHandler.invalidate();
-    }
 }

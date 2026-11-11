@@ -3,9 +3,9 @@ package net.sumik.sync.api.event;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.Cancelable;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.ICancellableEvent;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.api.shell.ShellStateContainer;
 import org.jetbrains.annotations.Nullable;
@@ -48,32 +48,32 @@ public final class PlayerSyncEvents {
         @Override
         public SyncFailureReason allowSync(Player player, ShellState targetState) {
             AllowSyncing event = new AllowSyncing(player, targetState);
-            MinecraftForge.EVENT_BUS.post(event);
+            NeoForge.EVENT_BUS.post(event);
             return event.getFailureReason();
         }
 
         @Override
         public ShellSelectionFailureReason allowShellSelection(Player player, ShellStateContainer targetContainer) {
             AllowShellSelection event = new AllowShellSelection(player, targetContainer);
-            MinecraftForge.EVENT_BUS.post(event);
+            NeoForge.EVENT_BUS.post(event);
             return event.getFailureReason();
         }
 
         @Override
         public ShellConstructionFailureReason allowShellConstruction(Player player, ShellStateContainer targetContainer) {
             AllowShellConstruction event = new AllowShellConstruction(player, targetContainer);
-            MinecraftForge.EVENT_BUS.post(event);
+            NeoForge.EVENT_BUS.post(event);
             return event.getFailureReason();
         }
 
         @Override
         public void onStartSyncing(Player player, ShellState targetState) {
-            MinecraftForge.EVENT_BUS.post(new StartSyncing(player, targetState));
+            NeoForge.EVENT_BUS.post(new StartSyncing(player, targetState));
         }
 
         @Override
         public void onStopSyncing(Player player, BlockPos previousPos, @Nullable ShellState storedState) {
-            MinecraftForge.EVENT_BUS.post(new StopSyncing(player, previousPos, storedState));
+            NeoForge.EVENT_BUS.post(new StopSyncing(player, previousPos, storedState));
         }
     }
 
@@ -112,8 +112,7 @@ public final class PlayerSyncEvents {
      * <p>When this event is called, all standard checks have already succeeded, i.e. this event
      * is used in addition to them.
      */
-    @Cancelable
-    public static class AllowSyncing extends PlayerSyncEvent {
+    public static class AllowSyncing extends PlayerSyncEvent implements ICancellableEvent {
         private final ShellState targetState;
         private SyncFailureReason failureReason = null;
 
@@ -148,8 +147,7 @@ public final class PlayerSyncEvents {
      * <p>When this event is called, all standard checks have already succeeded, i.e. this event
      * is used in addition to them.
      */
-    @Cancelable
-    public static class AllowShellConstruction extends PlayerSyncEvent {
+    public static class AllowShellConstruction extends PlayerSyncEvent implements ICancellableEvent {
         private final ShellStateContainer targetContainer;
         private ShellConstructionFailureReason failureReason = null;
 
@@ -184,8 +182,7 @@ public final class PlayerSyncEvents {
      * <p>When this event is called, all standard checks have already succeeded, i.e. this event
      * is used in addition to them.
      */
-    @Cancelable
-    public static class AllowShellSelection extends PlayerSyncEvent {
+    public static class AllowShellSelection extends PlayerSyncEvent implements ICancellableEvent {
         private final ShellStateContainer targetContainer;
         private ShellSelectionFailureReason failureReason = null;
 

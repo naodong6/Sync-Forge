@@ -3,11 +3,11 @@ package net.sumik.sync.client.render;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import net.sumik.sync.Sync;
 import org.joml.Matrix4f;
 
@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 
 @OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(modid = Sync.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Sync.MOD_ID, value = Dist.CLIENT, bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD)
 public final class CustomGameRenderer {
     @Nullable
     private static ShaderInstance renderTypeEntityTranslucentPartiallyTexturedShader;
@@ -27,13 +27,13 @@ public final class CustomGameRenderer {
 
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(Sync.MOD_ID, "rendertype_entity_translucent_partially_textured"),
+        event.registerShader(new ShaderInstance(event.getResourceProvider(), Sync.locate("rendertype_entity_translucent_partially_textured").toString(),
                         DefaultVertexFormat.NEW_ENTITY
                 ),
                 shader -> renderTypeEntityTranslucentPartiallyTexturedShader = shader
         );
 
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(Sync.MOD_ID, "rendertype_voxel"),
+        event.registerShader(new ShaderInstance(event.getResourceProvider(), Sync.locate("rendertype_voxel").toString(),
                         CustomVertexFormats.POSITION_COLOR_OVERLAY_LIGHT_NORMAL
                 ),
                 shader -> renderTypeVoxelShader = shader

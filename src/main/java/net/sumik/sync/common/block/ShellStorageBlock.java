@@ -1,6 +1,7 @@
 package net.sumik.sync.common.block;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.entity.Entity;
@@ -13,9 +14,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.sumik.sync.common.block.entity.ShellStorageBlockEntity;
+import com.mojang.serialization.MapCodec;
 
 @SuppressWarnings("deprecation")
 public class ShellStorageBlock extends AbstractShellContainerBlock {
+    public static final MapCodec<ShellStorageBlock> CODEC = simpleCodec(ShellStorageBlock::new);
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
@@ -42,6 +45,11 @@ public class ShellStorageBlock extends AbstractShellContainerBlock {
                 world.setBlock(secondPos, secondState.setValue(POWERED, powered), 10);
             }
         }
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Override

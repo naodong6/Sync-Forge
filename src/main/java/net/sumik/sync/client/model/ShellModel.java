@@ -6,8 +6,8 @@ import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.client.render.CustomRenderLayer;
 
@@ -54,9 +54,9 @@ public class ShellModel<T extends AgeableListModel<?>> extends Model {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         Model target = (this.isBeingPrinted() || this.isBeingDestroyed()) ? this.voxelModel : this.parentModel;
-        target.renderToBuffer(matrices, vertices, light, overlay, red, green, blue, alpha);
+        target.renderToBuffer(matrices, vertices, light, overlay, color);
     }
 
     private boolean isBeingPrinted() {

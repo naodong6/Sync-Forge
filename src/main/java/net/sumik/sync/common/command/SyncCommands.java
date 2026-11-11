@@ -5,16 +5,16 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import net.sumik.sync.Sync;
 import net.sumik.sync.common.utils.reflect.Activator;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = Sync.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Sync.MOD_ID, bus = net.neoforged.fml.common.EventBusSubscriber.Bus.GAME)
 public class SyncCommands {
     private static final Set<Command> COMMANDS = new HashSet<>();
 

@@ -4,21 +4,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * A container that can store player's shell.
  */
 public interface ShellStateContainer {
-    /**
-     * Capability for shell state containers
-     */
-    Capability<ShellStateContainer> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
-
-
     /**
      * Attempts to retrieve a {@link ShellStateContainer} instance from a block in the world.
      *
@@ -30,7 +21,7 @@ public interface ShellStateContainer {
     static ShellStateContainer find(Level world, BlockPos pos) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity != null) {
-            return blockEntity.getCapability(CAPABILITY).orElse(null);
+            return blockEntity instanceof ShellStateContainer container ? container : null;
         }
         return null;
     }

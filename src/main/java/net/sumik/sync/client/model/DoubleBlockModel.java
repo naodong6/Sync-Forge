@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.*;
 import java.util.function.Function;
@@ -75,31 +75,27 @@ public abstract class DoubleBlockModel extends Model {
         return template;
     }
 
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay) {
-        this.renderToBuffer(matrices, vertices, light, overlay, 1F, 1F, 1F, 1F);
-    }
-
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         matrices.pushPose();
-        this.render(DoubleBlockHalf.LOWER, matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.render(DoubleBlockHalf.LOWER, matrices, vertices, light, overlay, color);
         this.translate(matrices);
-        this.render(DoubleBlockHalf.UPPER, matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.render(DoubleBlockHalf.UPPER, matrices, vertices, light, overlay, color);
         matrices.popPose();
     }
 
     public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay) {
-        this.render(type, matrices, vertices, light, overlay, 1F, 1F, 1F, 1F);
+        this.render(type, matrices, vertices, light, overlay, -1);
     }
 
-    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         List<ModelPart> currentParts = this.parts.get(type);
         if (currentParts == null) {
             return;
         }
 
         for (ModelPart part : currentParts) {
-            part.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+            part.render(matrices, vertices, light, overlay, color);
         }
     }
 

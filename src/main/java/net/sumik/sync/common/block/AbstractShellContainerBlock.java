@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -32,8 +33,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.common.utils.ItemUtil;
 
 @SuppressWarnings("deprecation")
@@ -129,7 +130,7 @@ public abstract class AbstractShellContainerBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+    public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
         boolean bottom = isBottom(state);
         BlockPos bottomPos = bottom ? pos : pos.below();
         if (!world.isClientSide && player.isCreative()) {
@@ -141,7 +142,7 @@ public abstract class AbstractShellContainerBlock extends BaseEntityBlock {
                 }
             }
         }
-        super.playerWillDestroy(world, pos, state, player);
+        return super.playerWillDestroy(world, pos, state, player);
     }
 
     @Override
@@ -155,27 +156,32 @@ public abstract class AbstractShellContainerBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (ItemUtil.isWrench(player.getItemInHand(hand))) {
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos,
+                                              Player player, InteractionHand hand, BlockHitResult hit) {
+        if (ItemUtil.isWrench(stack)) {
             if (!world.isClientSide) {
                 world.setBlock(pos, state.cycle(OUTPUT), 10);
                 world.updateNeighbourForOutputSignal(pos, state.getBlock());
             }
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.sidedSuccess(world.isClientSide);
         }
+        return super.useItemOn(stack, state, world, pos, player, hand, hit);
+    }
 
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (!isBottom(state)) {
             pos = pos.below();
             state = world.getBlockState(pos);
         }
         if (world.getBlockEntity(pos) instanceof AbstractShellContainerBlockEntity shellContainer) {
-            return shellContainer.onUse(world, pos, player, hand);
+            return shellContainer.onUse(world, pos, player, InteractionHand.MAIN_HAND);
         }
-        return super.use(state, world, pos, player, hand, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter world, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 

@@ -1,12 +1,13 @@
 package net.sumik.sync.api.networking;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
 /**
  * Represents a packet that can be used for communication between a client and a server.
  */
-public interface PlayerPacket {
+public interface PlayerPacket extends CustomPacketPayload {
     /**
      * @return Identifier of the packet.
      */

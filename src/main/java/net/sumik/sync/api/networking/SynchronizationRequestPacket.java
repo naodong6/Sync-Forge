@@ -3,19 +3,21 @@ package net.sumik.sync.api.networking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.sumik.sync.Sync;
 import net.sumik.sync.api.shell.ServerShell;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.api.shell.ShellStateContainer;
 import net.sumik.sync.common.utils.BlockPosUtil;
 import net.sumik.sync.common.utils.WorldUtil;
+import net.sumik.sync.networking.SyncPackets;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -36,8 +38,13 @@ public class SynchronizationRequestPacket implements ServerPlayerPacket {
     }
 
     @Override
+    public CustomPacketPayload.Type<SynchronizationRequestPacket> type() {
+        return SyncPackets.SYNCHRONIZATION_REQUEST;
+    }
+
+    @Override
     public ResourceLocation getId() {
-        return new ResourceLocation(Sync.MOD_ID, "packet.shell.synchronization.request");
+        return ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "packet.shell.synchronization.request");
     }
 
     @Override
@@ -56,7 +63,7 @@ public class SynchronizationRequestPacket implements ServerPlayerPacket {
     }
 
     @Override
-    public void execute(MinecraftServer server, ServerPlayer player, NetworkEvent.Context ctx) {
+    public void execute(MinecraftServer server, ServerPlayer player, IPayloadContext ctx) {
         ServerShell shell = (ServerShell)player;
         ShellState state = shell.getShellStateByUuid(this.shellUuid);
 

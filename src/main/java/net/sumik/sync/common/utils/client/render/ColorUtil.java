@@ -1,8 +1,9 @@
 package net.sumik.sync.common.utils.client.render;
 
 import net.minecraft.world.item.DyeColor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.FastColor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public final class ColorUtil {
@@ -11,8 +12,9 @@ public final class ColorUtil {
     }
 
     public static int fromDyeColor(DyeColor color, float a) {
-        float[] rgb = color.getTextureDiffuseColors();
-        return fromRGBA(rgb[0], rgb[1], rgb[2], a);
+        int rgb = color.getTextureDiffuseColor();
+        return FastColor.ARGB32.color((int) (a * 255F),
+                FastColor.ARGB32.red(rgb), FastColor.ARGB32.green(rgb), FastColor.ARGB32.blue(rgb));
     }
 
     public static int fromRGBA(float r, float g, float b, float a) {

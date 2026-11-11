@@ -12,8 +12,8 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.client.model.ShellModel;
 import net.sumik.sync.common.block.entity.ShellEntity;
@@ -44,8 +44,8 @@ public class ShellEntityRenderer extends PlayerRenderer {
             poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
 
             this.applyStateToModel(this.shellModel, shell.getState());
-            VertexConsumer vertexConsumer = this.getVertexConsumerForPartiallyTexturedEntity(shell, progress, this.shellModel.getLayer(player.getSkinTextureLocation()), bufferSource);
-            this.shellModel.renderToBuffer(poseStack, vertexConsumer, packedLight, getOverlayCoords(player, 0), 1F, 1F, 1F, 1F);
+            VertexConsumer vertexConsumer = this.getVertexConsumerForPartiallyTexturedEntity(shell, progress, this.shellModel.getLayer(player.getSkin().texture()), bufferSource);
+            this.shellModel.renderToBuffer(poseStack, vertexConsumer, packedLight, getOverlayCoords(player, 0), -1);
 
             if (progress >= ShellState.PROGRESS_DONE) {
                 for (RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> layer : this.layers) {

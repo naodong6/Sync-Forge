@@ -8,17 +8,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.sumik.sync.Sync;
 
 public class SyncBlocks {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Sync.MOD_ID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, Sync.MOD_ID);
 
-    public static final RegistryObject<Block> SHELL_STORAGE = BLOCKS.register("shell_storage",
-            () -> new ShellStorageBlock(BlockBehaviour.Properties.copy(Blocks.GLASS)
+    public static final DeferredHolder<Block, Block> SHELL_STORAGE = BLOCKS.register("shell_storage",
+            () -> new ShellStorageBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
                     .mapColor(MapColor.COLOR_GRAY)
                     .requiresCorrectToolForDrops()
                     .strength(1.8F)
@@ -29,8 +29,8 @@ public class SyncBlocks {
                     .isSuffocating(SyncBlocks::never)
                     .isViewBlocking(SyncBlocks::never)));
 
-    public static final RegistryObject<Block> SHELL_CONSTRUCTOR = BLOCKS.register("shell_constructor",
-            () -> new ShellConstructorBlock(BlockBehaviour.Properties.copy(Blocks.GLASS)
+    public static final DeferredHolder<Block, Block> SHELL_CONSTRUCTOR = BLOCKS.register("shell_constructor",
+            () -> new ShellConstructorBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
                     .mapColor(MapColor.COLOR_GRAY)
                     .requiresCorrectToolForDrops()
                     .strength(1.8F)
@@ -41,8 +41,8 @@ public class SyncBlocks {
                     .isSuffocating(SyncBlocks::never)
                     .isViewBlocking(SyncBlocks::never)));
 
-    public static final RegistryObject<Block> TREADMILL = BLOCKS.register("treadmill",
-            () -> new TreadmillBlock(BlockBehaviour.Properties.copy(Blocks.STONE)
+    public static final DeferredHolder<Block, Block> TREADMILL = BLOCKS.register("treadmill",
+            () -> new TreadmillBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)
                     .mapColor(MapColor.COLOR_GRAY)
                     .requiresCorrectToolForDrops()
                     .strength(1.8F)

@@ -2,7 +2,7 @@ package net.sumik.sync.client.gui;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.sumik.sync.api.shell.ShellStateContainer;
 import net.sumik.sync.client.gl.MSAAFramebuffer;
 import net.sumik.sync.client.gui.hud.HudController;
@@ -12,8 +12,8 @@ import net.sumik.sync.client.gui.widget.PageDisplayWidget;
 import net.sumik.sync.client.gui.widget.ShellSelectorButtonWidget;
 import net.sumik.sync.api.shell.Shell;
 import net.sumik.sync.api.shell.ShellState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
@@ -155,17 +155,17 @@ public class ShellSelectorGUI extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics) {
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         if (Objects.requireNonNull(this.minecraft).level != null) {
             guiGraphics.fillGradient(0, 0, this.width, this.height, BACKGROUND_COLOR, BACKGROUND_COLOR);
         } else {
-            super.renderBackground(guiGraphics);
+            super.renderBackground(guiGraphics, mouseX, mouseY, delta);
         }
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, delta);
         MSAAFramebuffer.use(MSAAFramebuffer.MAX_SAMPLES, () -> super.render(guiGraphics, mouseX, mouseY, delta));
         this.renderTooltips(guiGraphics, mouseX, mouseY);
     }

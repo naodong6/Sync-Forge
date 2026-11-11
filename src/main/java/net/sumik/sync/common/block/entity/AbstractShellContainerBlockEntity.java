@@ -26,10 +26,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.common.utils.ItemUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -219,9 +220,9 @@ public abstract class AbstractShellContainerBlockEntity extends BlockEntity impl
         return AbstractShellContainerBlock.getShellContainerHalf(state);
     }
 
-    public CompoundTag getUpdateTag() {
-        CompoundTag nbt = super.getUpdateTag();
-        this.saveAdditional(nbt);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag nbt = super.getUpdateTag(registries);
+        this.saveAdditional(nbt, registries);
         return nbt;
     }
 
@@ -231,8 +232,8 @@ public abstract class AbstractShellContainerBlockEntity extends BlockEntity impl
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         if (this.shell != null) {
             nbt.put("shell", this.shell.writeNbt(new CompoundTag()));
         }
@@ -240,8 +241,8 @@ public abstract class AbstractShellContainerBlockEntity extends BlockEntity impl
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
         this.shell = nbt.contains("shell") ? ShellState.fromNbt(nbt.getCompound("shell")) : null;
 
         // Fix position for existing shells
@@ -284,12 +285,12 @@ public abstract class AbstractShellContainerBlockEntity extends BlockEntity impl
         boolean isArmorSlot = slot >= 0 && slot < armorSize;
         if (isArmorSlot) {
             EquipmentSlot equipmentSlot = ItemUtil.getPreferredEquipmentSlot(stack);
-            return ItemUtil.isArmor(stack) && equipmentSlot.getType() == EquipmentSlot.Type.ARMOR && slot == equipmentSlot.getIndex();
+            return ItemUtil.isArmor(stack) && equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && slot == equipmentSlot.getIndex();
         }
 
         boolean isOffHandSlot = slot >= armorSize && slot < (armorSize + inventory.offHand.size());
         if (isOffHandSlot) {
-            return ItemUtil.getPreferredEquipmentSlot(stack) == EquipmentSlot.OFFHAND || inventory.main.stream().noneMatch(x -> x.isEmpty() || (x.getCount() + stack.getCount()) <= x.getMaxStackSize() && ItemStack.isSameItemSameTags(x, stack));
+            return ItemUtil.getPreferredEquipmentSlot(stack) == EquipmentSlot.OFFHAND || inventory.main.stream().noneMatch(x -> x.isEmpty() || (x.getCount() + stack.getCount()) <= x.getMaxStackSize() && ItemStack.isSameItemSameComponents(x, stack));
         }
 
         return true;

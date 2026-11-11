@@ -1,10 +1,10 @@
 package net.sumik.sync.client.gui.controller;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 @OnlyIn(Dist.CLIENT)
 public final class DeathScreenController {
@@ -23,7 +23,7 @@ public final class DeathScreenController {
     }
 
     static {
-        MinecraftForge.EVENT_BUS.register(DeathScreenController.class);
+        NeoForge.EVENT_BUS.register(DeathScreenController.class);
     }
 
     @SubscribeEvent

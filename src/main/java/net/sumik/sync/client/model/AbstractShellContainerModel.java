@@ -6,8 +6,8 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.common.utils.math.Radians;
 
 import java.util.function.Function;
@@ -47,7 +47,7 @@ public abstract class AbstractShellContainerModel extends DoubleBlockModel {
     }
 
     @Override
-    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         this.doorLL.yRot = this.doorLU.yRot = Radians.R_PI_2 * this.doorOpenProgress;
         this.doorRL.yRot = this.doorRU.yRot = Radians.R_PI - Radians.R_PI_2 * this.doorOpenProgress;
 
@@ -55,7 +55,7 @@ public abstract class AbstractShellContainerModel extends DoubleBlockModel {
         this.doorRL.z = this.doorRU.z = -14 + 14 * this.doorOpenProgress;
         this.doorRL.x = this.doorRU.x = 15 - this.doorOpenProgress;
 
-        super.render(type, matrices, vertices, light, overlay, red, green, blue, alpha);
+        super.render(type, matrices, vertices, light, overlay, color);
     }
 
     @Override

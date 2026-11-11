@@ -5,15 +5,16 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.sumik.sync.Sync;
 import net.sumik.sync.networking.SyncPackets;
 
@@ -29,8 +30,13 @@ public class ShellDestroyedPacket implements ClientPlayerPacket {
     }
 
     @Override
+    public CustomPacketPayload.Type<ShellDestroyedPacket> type() {
+        return SyncPackets.SHELL_DESTROYED;
+    }
+
+    @Override
     public ResourceLocation getId() {
-        return new ResourceLocation(Sync.MOD_ID, "packet.shell.destroyed");
+        return ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "packet.shell.destroyed");
     }
 
     @Override
@@ -45,7 +51,7 @@ public class ShellDestroyedPacket implements ClientPlayerPacket {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, NetworkEvent.Context ctx) {
+    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, IPayloadContext ctx) {
         for (int i = 0; i < 3; ++i) {
             player.clientLevel.addDestroyBlockEffect(this.pos, Blocks.DEEPSLATE.defaultBlockState());
             player.clientLevel.addDestroyBlockEffect(this.pos.above(), Blocks.DEEPSLATE.defaultBlockState());

@@ -8,10 +8,9 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.common.utils.math.Radians;
 import org.joml.Matrix4f;
 
@@ -20,7 +19,6 @@ import java.util.function.Consumer;
 @OnlyIn(Dist.CLIENT)
 public final class RenderSystemUtil {
     public static final int MAX_LIGHT_LEVEL = (15 << 20) | (15 << 4);
-    private static final RenderBuffers RENDER_BUFFERS = new RenderBuffers();
 
     public static void drawTriangleStrip(Consumer<VertexConsumer> consumer) {
         drawTriangleStrip(consumer, DefaultVertexFormat.POSITION_COLOR);
@@ -47,8 +45,8 @@ public final class RenderSystemUtil {
             double x1 = minorR * cos + cX;
             double y1 = minorR * sin + cY;
 
-            consumer.vertex(matrix, (float)x0, (float)y0, 0).color(r, g, b, a).endVertex();
-            consumer.vertex(matrix, (float)x1, (float)y1, 0).color(r, g, b, a).endVertex();
+            consumer.addVertex(matrix, (float)x0, (float)y0, 0).setColor(r, g, b, a);
+            consumer.addVertex(matrix, (float)x1, (float)y1, 0).setColor(r, g, b, a);
         }
     }
 
@@ -69,9 +67,9 @@ public final class RenderSystemUtil {
         drawQuadrant(matrix, consumer, x + borderRadius, y + borderRadius, borderRadius, 2, step, r, g, b, a);
         drawQuadrant(matrix, consumer, x + width - borderRadius, y + borderRadius, borderRadius, 3, step, r, g, b, a);
 
-        consumer.vertex(matrix, x + width, y + height - borderRadius, 0).color(r, g, b, a).endVertex();
-        consumer.vertex(matrix, x + borderRadius, y + borderRadius, 0).color(r, g, b, a).endVertex();
-        consumer.vertex(matrix, x + borderRadius, y + height - borderRadius, 0).color(r, g, b, a).endVertex();
+        consumer.addVertex(matrix, x + width, y + height - borderRadius, 0).setColor(r, g, b, a);
+        consumer.addVertex(matrix, x + borderRadius, y + borderRadius, 0).setColor(r, g, b, a);
+        consumer.addVertex(matrix, x + borderRadius, y + height - borderRadius, 0).setColor(r, g, b, a);
 
         poseStack.popPose();
     }
@@ -82,24 +80,23 @@ public final class RenderSystemUtil {
         for (float i = start; i < end; i += step) {
             float x = radius * (float)Math.cos(i) + cX;
             float y = radius * (float)Math.sin(i) + cY;
-            consumer.vertex(matrix, x, y, 0).color(r, g, b, a).endVertex();
-            consumer.vertex(matrix, cX, cY, 0).color(r, g, b, a).endVertex();
+            consumer.addVertex(matrix, x, y, 0).setColor(r, g, b, a);
+            consumer.addVertex(matrix, cX, cY, 0).setColor(r, g, b, a);
         }
         float x = radius * (float)Math.cos(end) + cX;
         float y = radius * (float)Math.sin(end) + cY;
-        consumer.vertex(matrix, x, y, 0).color(r, g, b, a).endVertex();
-        consumer.vertex(matrix, cX, cY, 0).color(r, g, b, a).endVertex();
+        consumer.addVertex(matrix, x, y, 0).setColor(r, g, b, a);
+        consumer.addVertex(matrix, cX, cY, 0).setColor(r, g, b, a);
     }
 
     public static void draw(Consumer<VertexConsumer> consumer, VertexFormat.Mode drawMode, VertexFormat format) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.setShader(() -> GameRenderer.getPositionColorShader());
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(drawMode, format);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(drawMode, format);
         consumer.accept(bufferBuilder);
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         RenderSystem.disableBlend();
     }
@@ -109,7 +106,7 @@ public final class RenderSystemUtil {
     }
 
     public static MultiBufferSource.BufferSource getEntityVertexConsumerProvider() {
-        return RENDER_BUFFERS.bufferSource();
+        return Minecraft.getInstance().renderBuffers().bufferSource();
     }
 
     public static void drawCenteredText(GuiGraphics guiGraphics, Component text, float cX, float cY, int color) {
@@ -125,7 +122,7 @@ public final class RenderSystemUtil {
     }
 
     public static void drawCenteredText(GuiGraphics guiGraphics, Component text, Font font, float cX, float cY, float scale, int color, boolean shadow) {
-        MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource immediate = getEntityVertexConsumerProvider();
         drawCenteredText(guiGraphics, text, immediate, font, cX, cY, scale, color, shadow);
         immediate.endBatch();
     }

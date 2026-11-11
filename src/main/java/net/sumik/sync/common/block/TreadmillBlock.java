@@ -2,6 +2,7 @@
 
     import net.minecraft.core.BlockPos;
     import net.minecraft.core.Direction;
+    import com.mojang.serialization.MapCodec;
     import net.minecraft.core.particles.ParticleTypes;
     import net.minecraft.util.RandomSource;
     import net.minecraft.util.StringRepresentable;
@@ -25,8 +26,8 @@
     import net.minecraft.world.phys.shapes.CollisionContext;
     import net.minecraft.world.phys.shapes.Shapes;
     import net.minecraft.world.phys.shapes.VoxelShape;
-    import net.minecraftforge.api.distmarker.Dist;
-    import net.minecraftforge.api.distmarker.OnlyIn;
+    import net.neoforged.api.distmarker.Dist;
+    import net.neoforged.api.distmarker.OnlyIn;
     import net.sumik.sync.common.block.entity.SyncBlockEntities;
     import net.sumik.sync.common.block.entity.TickableBlockEntity;
     import net.sumik.sync.common.block.entity.TreadmillBlockEntity;
@@ -34,6 +35,7 @@
 
     @SuppressWarnings("deprecation")
     public class TreadmillBlock extends HorizontalDirectionalBlock implements EntityBlock {
+        public static final MapCodec<TreadmillBlock> CODEC = simpleCodec(TreadmillBlock::new);
         public static final EnumProperty<Part> PART = EnumProperty.create("treadmill_part", Part.class);
 
         private static final VoxelShape NORTH_SHAPE_BACK;
@@ -48,6 +50,11 @@
         public TreadmillBlock(Properties properties) {
             super(properties);
             this.registerDefaultState(this.stateDefinition.any().setValue(PART, Part.BACK));
+        }
+
+        @Override
+        protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+            return CODEC;
         }
 
         public static boolean isBack(BlockState state) {
@@ -126,7 +133,7 @@
         }
 
         @Override
-        public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+        public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
             if (!world.isClientSide && player.isCreative()) {
                 Part part = state.getValue(PART);
                 if (part == Part.FRONT) {
@@ -138,11 +145,11 @@
                     }
                 }
             }
-            super.playerWillDestroy(world, pos, state, player);
+            return super.playerWillDestroy(world, pos, state, player);
         }
 
         @Override
-        public boolean isPathfindable(BlockState state, BlockGetter world, BlockPos pos, PathComputationType type) {
+        public boolean isPathfindable(BlockState state, PathComputationType type) {
             return true;
         }
 

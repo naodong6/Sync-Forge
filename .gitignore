@@ -33,6 +33,12 @@ bin/
 run/
 run-data/
 runs/
+run-client/
+run-server/
+logs/
 
-# forge generated resources cache
+# generated data
+
 /src/generated/resources/.cache/
+*.args
+repo/

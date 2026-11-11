@@ -2,13 +2,14 @@ package net.sumik.sync.common.utils.nbt;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -22,13 +23,13 @@ public final class OfflinePlayerNbtManager {
     }
 
     public static void editPlayerNbt(MinecraftServer server, UUID uuid, Function<CompoundTag, CompoundTag> nbtEditor) {
-        File nbtPath = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(uuid.toString() + DATA_FILE_EXTENSION).toFile();
+        Path nbtPath = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(uuid.toString() + DATA_FILE_EXTENSION);
         try {
-            if (!nbtPath.isFile()) {
+            if (!java.nio.file.Files.isRegularFile(nbtPath)) {
                 return;
             }
 
-            CompoundTag nbt = NbtIo.readCompressed(nbtPath);
+            CompoundTag nbt = NbtIo.readCompressed(nbtPath, NbtAccounter.unlimitedHeap());
             nbt = nbtEditor.apply(nbt);
             NbtIo.writeCompressed(nbt, nbtPath);
         } catch (Throwable exception) {

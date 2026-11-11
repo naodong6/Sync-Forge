@@ -2,8 +2,8 @@ package net.sumik.sync.mixins.sync.client;
 
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.client.model.VoxelProvider;
 import net.sumik.sync.common.utils.client.render.ModelUtil;
 import net.sumik.sync.common.utils.math.Voxel;

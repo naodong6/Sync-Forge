@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -12,8 +13,8 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.client.render.entity.ShellEntityRenderer;
 import net.sumik.sync.common.block.entity.ShellEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -54,7 +55,7 @@ public abstract class EntityRenderDispatcherMixin {
     private <T extends Entity> void sync$getRenderer(T entity, CallbackInfoReturnable<EntityRenderer<? super T>> cir) {
         if (entity instanceof ShellEntity shell) {
             PlayerInfo playerInfo = shell.getPlayerInfo();
-            String modelType = (playerInfo != null && playerInfo.getModelName().equals("slim")) ? "slim" : "default";
+            String modelType = (playerInfo != null && playerInfo.getSkin().model() == PlayerSkin.Model.SLIM) ? "slim" : "default";
             EntityRenderer<? extends Player> renderer = this.sync$shellRenderers.get(modelType);
             if (renderer != null) {
                 cir.setReturnValue((EntityRenderer<? super T>) renderer);

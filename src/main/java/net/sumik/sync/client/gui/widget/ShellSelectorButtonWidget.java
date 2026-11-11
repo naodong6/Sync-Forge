@@ -7,8 +7,8 @@ import net.sumik.sync.client.render.MatrixStackStorage;
 import net.sumik.sync.api.shell.ClientShell;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.api.event.PlayerSyncEvents;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -162,11 +162,11 @@ public class ShellSelectorButtonWidget extends AbstractWidget {
         float alpha = this.isPressed() ? this.pressedAlpha : this.isHovered() ? this.hoveredAlpha : this.alpha;
         DyeColor borderColor = this.shell == null ? null : this.shell.getColor();
         DyeColor color = borderColor != null && (this.isHovered() || this.isPressed()) ? borderColor : this.color;
-        float[] rgb = color.getTextureDiffuseColors();
+        float[] rgb = ColorUtil.toRGBA(color.getTextureDiffuseColor());
         RenderSystemUtil.drawAnnulusSector(matrices, this.cX, this.cY, this.majorR, this.minorR, this.from, this.to, this.step, rgb[0], rgb[1], rgb[2], alpha);
 
         if (borderColor != null) {
-            rgb = borderColor.getTextureDiffuseColors();
+            rgb = ColorUtil.toRGBA(borderColor.getTextureDiffuseColor());
             RenderSystemUtil.drawAnnulusSector(matrices, this.cX, this.cY, this.majorR, this.minorRBorder, this.from, this.to, this.step, rgb[0], rgb[1], rgb[2], 1F);
         }
     }

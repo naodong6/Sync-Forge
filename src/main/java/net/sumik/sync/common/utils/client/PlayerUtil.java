@@ -6,11 +6,11 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.sumik.sync.Sync;
 import net.sumik.sync.common.utils.WorldUtil;
 
@@ -20,12 +20,12 @@ import java.util.concurrent.ConcurrentMap;
 
 @OnlyIn(Dist.CLIENT)
 public final class PlayerUtil {
-    private static final ResourceLocation ANY_WORLD = new ResourceLocation(Sync.MOD_ID, "any_world");
+    private static final ResourceLocation ANY_WORLD = ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "any_world");
     private static final Minecraft CLIENT = Minecraft.getInstance();
     private static final ConcurrentMap<ResourceLocation, ConcurrentLinkedQueue<PlayerUpdate>> UPDATES = new ConcurrentHashMap<>();
 
     static {
-        MinecraftForge.EVENT_BUS.register(PlayerUtil.class);
+        NeoForge.EVENT_BUS.register(PlayerUtil.class);
     }
 
     public static void recordPlayerUpdate(PlayerUpdate playerUpdate) {

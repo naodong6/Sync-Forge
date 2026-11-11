@@ -4,18 +4,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import net.sumik.sync.Sync;
 
 import java.util.Objects;
 
 @OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(modid = Sync.MOD_ID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Sync.MOD_ID, value = Dist.CLIENT)
 public class PersistentCameraEntity extends LocalPlayer {
     private long lastMovementTime;
     private float initialYaw;
@@ -157,9 +157,7 @@ public class PersistentCameraEntity extends LocalPlayer {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
-
+    public static void onClientTick(ClientTickEvent.Pre event) {
         Minecraft client = Minecraft.getInstance();
         if (!(client.getCameraEntity() instanceof PersistentCameraEntity camera) || camera.goal == null) {
             return;

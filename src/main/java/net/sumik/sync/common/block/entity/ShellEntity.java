@@ -9,9 +9,10 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.PlayerModelPart;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.api.shell.ShellState;
 
 import java.util.UUID;
@@ -64,7 +65,7 @@ public class ShellEntity extends RemotePlayer {
     }
 
     @Override
-    protected void dropAllDeathLoot(DamageSource damageSource) {
+    protected void dropAllDeathLoot(ServerLevel level, DamageSource damageSource) {
         // Don't drop items when shell is destroyed
     }
 

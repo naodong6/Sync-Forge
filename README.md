@@ -1,10 +1,12 @@
 ![Logo](media/logo.png)
 
-# Sync (Forge)
+# Sync (NeoForge 1.21.1)
 [![CurseForge](https://img.shields.io/badge/dynamic/json?color=%23f16436&label=CurseForge&query=title&url=https%3A%2F%2Fapi.cfwidget.com%2F515365&cacheSeconds=3600)](https://www.curseforge.com/minecraft/mc-mods/sync-fabric-rereported)
 [![GitHub license](https://img.shields.io/github/license/pawjwp/sync-fabric.svg?cacheSeconds=36000)](https://github.com/pawjwp/sync-fabric?tab=License-1-ov-file)
 
 [Sync (Forge)](https://github.com/pawjwp/sync-fabric) is an unofficial port of an [unofficial port](https://modrinth.com/mod/sync-fabric-reported) of an [unofficial reimplementation](https://modrinth.com/mod/sync-fabric) of the original [Sync](https://github.com/iChun/Sync) mod, originally developed by [iChun](https://github.com/iChun). This version was created for the [Crash Landing Remake](https://modrinth.com/modpack/crash-landing-remake) modpack and fixes a couple of significant bugs (see versions page).
+
+This repository contains a community port of the Forge edition to Minecraft 1.21.1 and NeoForge.
 
 The original description says it all:
 
@@ -203,8 +205,8 @@ You can help translate the mod to additional languages here: [crowdin.com](https
 ## Installation
 
 Requirements:
- - Minecraft `1.20.1`
- - Forge Loader `>=0.16.10`
+ - Minecraft `1.21.1`
+ - NeoForge `>=21.1.0`
 
 You can download the mod from:
 
@@ -242,13 +244,13 @@ There's [no documentation](https://www.commitstrip.com/en/2021/11/10/no-document
 ## Building from sources
 
 Requirements:
- - JDK `17`
+ - JDK `21`
 
 ### Linux/MacOS
 
-```cmd
-git clone https://github.com/Kir-Antipov/sync-fabric.git
-cd sync-fabric
+```bash
+git clone https://github.com/VTSumik/Sync-Forge.git
+cd Sync-Forge
 
 chmod +x ./gradlew
 ./gradlew build
@@ -256,12 +258,12 @@ cd build/libs
 ```
 ### Windows
 
-```cmd
-git clone https://github.com/Kir-Antipov/sync-fabric.git
-cd sync-fabric
+```powershell
+git clone https://github.com/VTSumik/Sync-Forge.git
+cd Sync-Forge
 
-gradlew build
-cd build/libs
+.\gradlew.bat build
+cd build\libs
 ```
 
 ----

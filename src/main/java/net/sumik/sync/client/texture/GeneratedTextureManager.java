@@ -5,8 +5,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public final class GeneratedTextureManager {
         List<ResourceLocation> textures = new ArrayList<>();
 
         for (AbstractTexture texture : (Iterable<AbstractTexture>)generator.generateTextures()::iterator) {
-            ResourceLocation id = new ResourceLocation("__dynamic", format + (++textureCounter));
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath("__dynamic", format + (++textureCounter));
             textureManager.register(id, texture);
             textures.add(id);
         }

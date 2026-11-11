@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.api.shell.ShellState;
 
 @OnlyIn(Dist.CLIENT)
@@ -101,8 +101,8 @@ public class ShellConstructorModel extends AbstractShellContainerModel {
     }
 
     @Override
-    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
-        super.render(type, matrices, vertices, light, overlay, red, green, blue, alpha);
+    public void render(DoubleBlockHalf type, PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+        super.render(type, matrices, vertices, light, overlay, color);
         if (type != BOTTOM || !this.showInnerParts) {
             return;
         }
@@ -121,22 +121,22 @@ public class ShellConstructorModel extends AbstractShellContainerModel {
         float printerY = MIN_PRINTER_Y + PRINTER_HEIGHT * (printingProgress <= 1F ? printingProgress : (1F - paintingProgress));
         float sprayerY = MIN_SPRAYER_Y + SPRAYER_HEIGHT * (printingProgress < SPRAYER_ACTIVATION_STAGE ? 0 : printingProgress <= 1F ? ((printingProgress - SPRAYER_ACTIVATION_STAGE) / (1F - SPRAYER_ACTIVATION_STAGE)) : (1F - paintingProgress));
 
-        this.renderPrinter(printerY, matrices, vertices, light, overlay, red, green, blue, alpha);
-        this.renderSprayer(sprayerY, true, matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.renderPrinter(printerY, matrices, vertices, light, overlay, color);
+        this.renderSprayer(sprayerY, true, matrices, vertices, light, overlay, color);
 
         if (sprayerY < MAST_Y) {
-            this.renderSprayer(MAST_Y, false, matrices, vertices, light, overlay, red, green, blue, alpha);
+            this.renderSprayer(MAST_Y, false, matrices, vertices, light, overlay, color);
         }
     }
 
-    private void renderSprayer(float y, boolean isFullyVisible, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    private void renderSprayer(float y, boolean isFullyVisible, PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         this.sprayerRMast.y = y;
         this.sprayerGMast.y = y;
         this.sprayerBMast.y = y;
 
-        this.sprayerRMast.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        this.sprayerGMast.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        this.sprayerBMast.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.sprayerRMast.render(matrices, vertices, light, overlay, color);
+        this.sprayerGMast.render(matrices, vertices, light, overlay, color);
+        this.sprayerBMast.render(matrices, vertices, light, overlay, color);
 
         if (!isFullyVisible) {
             return;
@@ -147,16 +147,16 @@ public class ShellConstructorModel extends AbstractShellContainerModel {
         this.sprayerG.y = y;
         this.sprayerB.y = y;
 
-        this.sprayerR.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        this.sprayerG.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        this.sprayerB.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.sprayerR.render(matrices, vertices, light, overlay, color);
+        this.sprayerG.render(matrices, vertices, light, overlay, color);
+        this.sprayerB.render(matrices, vertices, light, overlay, color);
     }
 
-    private void renderPrinter(float y, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    private void renderPrinter(float y, PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         this.printerL.y = y;
         this.printerR.y = y;
 
-        this.printerL.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-        this.printerR.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.printerL.render(matrices, vertices, light, overlay, color);
+        this.printerR.render(matrices, vertices, light, overlay, color);
     }
 }

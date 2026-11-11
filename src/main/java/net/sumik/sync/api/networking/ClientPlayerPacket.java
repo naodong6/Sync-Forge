@@ -6,23 +6,21 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.sumik.sync.common.utils.client.PlayerUtil;
 import net.sumik.sync.common.utils.reflect.Activator;
-import net.sumik.sync.common.utils.reflect.ClassUtil;
 import net.sumik.sync.networking.SyncPackets;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -43,7 +41,7 @@ public interface ClientPlayerPacket extends PlayerPacket {
      * @param player Player that should receive the packet.
      */
     default void send(ServerPlayer player) {
-        SyncPackets.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), this);
+        SyncPackets.sendToPlayer(this, player);
     }
 
     /**
@@ -53,14 +51,7 @@ public interface ClientPlayerPacket extends PlayerPacket {
      * @param radius The radius.
      */
     default void send(ServerLevel world, BlockPos pos, double radius) {
-        PacketDistributor.TargetPoint target =
-                new PacketDistributor.TargetPoint(
-                        pos.getX(), pos.getY(), pos.getZ(),
-                        radius, world.dimension());
-
-        SyncPackets.CHANNEL.send(
-                PacketDistributor.NEAR.with(() -> target),
-                this);
+        SyncPackets.sendToPlayersNear(this, world, pos.getX(), pos.getY(), pos.getZ(), radius);
     }
 
     /**
@@ -101,7 +92,7 @@ public interface ClientPlayerPacket extends PlayerPacket {
      * @param ctx The network context.
      */
     @OnlyIn(Dist.CLIENT)
-    default void execute(NetworkEvent.Context ctx) {
+    default void execute(IPayloadContext ctx) {
         Minecraft client = Minecraft.getInstance();
         ClientPacketListener handler = client.getConnection();
 
@@ -129,39 +120,18 @@ public interface ClientPlayerPacket extends PlayerPacket {
      * @param ctx The network context.
      */
     @OnlyIn(Dist.CLIENT)
-    default void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, NetworkEvent.Context ctx) { }
+    default void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, IPayloadContext ctx) { }
 
     /**
      * Handles the packet received from the network.
      * This is called by Forge's networking system.
      *
-     * @param contextSupplier The network context supplier.
+     * @param ctx The network context.
      */
-    default void handle(Supplier<NetworkEvent.Context> contextSupplier) {
-        NetworkEvent.Context ctx = contextSupplier.get();
-
-        if (ctx.getDirection().getReceptionSide().isClient()) {
-            boolean hasCustomExecute = ClassUtil.getMethod(this.getClass(), "execute",
-                            Minecraft.class, LocalPlayer.class, ClientPacketListener.class, NetworkEvent.Context.class)
-                    .map(method -> !method.getDeclaringClass().equals(ClientPlayerPacket.class))
-                    .orElse(false);
-
-            if (hasCustomExecute || !this.isBackgroundTask()) {
-                execute(ctx);
-            } else {
-                // Execute immediately for background tasks without custom execute
-                Minecraft client = Minecraft.getInstance();
-                ClientPacketListener handler = client.getConnection();
-                if (handler != null) {
-                    LocalPlayer player = client.player;
-                    if (player != null) {
-                        this.execute(client, player, handler, ctx);
-                    }
-                }
-            }
+    default void handle(IPayloadContext ctx) {
+        if (ctx.flow() == PacketFlow.CLIENTBOUND) {
+            ctx.enqueueWork(() -> execute(ctx));
         }
-
-        ctx.setPacketHandled(true);
     }
 
     /**

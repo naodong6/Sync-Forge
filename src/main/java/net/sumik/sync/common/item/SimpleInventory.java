@@ -2,6 +2,7 @@ package net.sumik.sync.common.item;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -125,7 +126,7 @@ public class SimpleInventory implements Container, Nameable {
                 if (!inventory.get(i).isEmpty()) {
                     CompoundTag compound = new CompoundTag();
                     compound.putByte("Slot", (byte)(i + delta));
-                    inventory.get(i).save(compound);
+                    compound.put("item", inventory.get(i).save(RegistryAccess.EMPTY));
                     nbtList.add(compound);
                 }
             }
@@ -141,7 +142,9 @@ public class SimpleInventory implements Container, Nameable {
         for(int i = 0; i < nbtList.size(); ++i) {
             CompoundTag nbtCompound = nbtList.getCompound(i);
             int j = nbtCompound.getByte("Slot") & 255;
-            ItemStack itemStack = ItemStack.of(nbtCompound);
+            ItemStack itemStack = nbtCompound.contains("item")
+                    ? ItemStack.parseOptional(RegistryAccess.EMPTY, nbtCompound.getCompound("item"))
+                    : ItemStack.EMPTY;
             if (!itemStack.isEmpty()) {
                 if (j < this.main.size()) {
                     this.main.set(j, itemStack);

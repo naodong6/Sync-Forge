@@ -4,8 +4,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.Sync;
 import net.sumik.sync.client.model.DoubleBlockModel;
 import net.sumik.sync.client.model.TreadmillModel;
@@ -15,7 +15,7 @@ import net.sumik.sync.common.block.entity.TreadmillBlockEntity;
 
 @OnlyIn(Dist.CLIENT)
 public class TreadmillBlockEntityRenderer extends DoubleBlockEntityRenderer<TreadmillBlockEntity> {
-    private static final ResourceLocation TREADMILL_TEXTURE_ID = new ResourceLocation(Sync.MOD_ID, "textures/block/treadmill.png");
+    private static final ResourceLocation TREADMILL_TEXTURE_ID = ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "textures/block/treadmill.png");
     private static final BlockState DEFAULT_STATE = SyncBlocks.TREADMILL.get().defaultBlockState()
             .setValue(TreadmillBlock.PART, TreadmillBlock.Part.FRONT)
             .setValue(TreadmillBlock.FACING, Direction.SOUTH);

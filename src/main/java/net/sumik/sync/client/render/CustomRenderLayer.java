@@ -5,10 +5,11 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.BiFunction;
+import java.lang.reflect.Method;
 
 @OnlyIn(Dist.CLIENT)
 public final class CustomRenderLayer extends RenderType {
@@ -33,12 +34,10 @@ public final class CustomRenderLayer extends RenderType {
     }
 
     static {
-        VOXELS = create("voxels",
+        VOXELS = createRenderType("voxels",
                 CustomVertexFormats.POSITION_COLOR_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
                 256,
-                false,
-                false,
                 CompositeState.builder()
                         .setShaderState(new ShaderStateShard(CustomGameRenderer::getRenderTypeVoxelShader))
                         .setTransparencyState(NO_TRANSPARENCY)
@@ -59,14 +58,23 @@ public final class CustomRenderLayer extends RenderType {
                     .setWriteMaskState(COLOR_DEPTH_WRITE)
                     .createCompositeState(outline);
 
-            return create("entity_translucent_partially_textured",
+            return createRenderType("entity_translucent_partially_textured",
                     DefaultVertexFormat.NEW_ENTITY,
                     VertexFormat.Mode.QUADS,
                     256,
-                    true,
-                    true,
                     state
             );
         });
+    }
+
+    private static RenderType createRenderType(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, CompositeState state) {
+        try {
+            Method method = RenderType.class.getDeclaredMethod("create", String.class, VertexFormat.class,
+                    VertexFormat.Mode.class, int.class, CompositeState.class);
+            method.setAccessible(true);
+            return (RenderType) method.invoke(null, name, format, mode, bufferSize, state);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Unable to create render type " + name, e);
+        }
     }
 }

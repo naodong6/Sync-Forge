@@ -1,7 +1,7 @@
 package net.sumik.sync.client.model;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.common.utils.math.Voxel;
 
 import java.util.stream.Stream;

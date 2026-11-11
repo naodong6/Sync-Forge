@@ -5,13 +5,15 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.sumik.sync.Sync;
 import net.sumik.sync.api.shell.Shell;
 import net.sumik.sync.api.shell.ShellState;
+import net.sumik.sync.networking.SyncPackets;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,8 +34,13 @@ public class ShellUpdatePacket implements ClientPlayerPacket {
     }
 
     @Override
+    public CustomPacketPayload.Type<ShellUpdatePacket> type() {
+        return SyncPackets.SHELL_UPDATE;
+    }
+
+    @Override
     public ResourceLocation getId() {
-        return new ResourceLocation(Sync.MOD_ID, "packet.shell.update");
+        return ResourceLocation.fromNamespaceAndPath(Sync.MOD_ID, "packet.shell.update");
     }
 
     @Override
@@ -58,7 +65,7 @@ public class ShellUpdatePacket implements ClientPlayerPacket {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, NetworkEvent.Context ctx) {
+    public void execute(Minecraft client, LocalPlayer player, ClientPacketListener handler, IPayloadContext ctx) {
         Shell shell = (Shell)player;
         shell.changeArtificialStatus(this.isArtificial);
         shell.setAvailableShellStates(this.states.stream());

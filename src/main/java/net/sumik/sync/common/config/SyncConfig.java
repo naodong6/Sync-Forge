@@ -2,59 +2,59 @@ package net.sumik.sync.common.config;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.sumik.sync.Sync;
 import net.sumik.sync.api.shell.ShellPriority;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Mod.EventBusSubscriber(modid = Sync.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Sync.MOD_ID, bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD)
 public class SyncConfig {
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-    public static final ForgeConfigSpec SPEC;
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    public static final ModConfigSpec SPEC;
 
     // General settings
-    private static final ForgeConfigSpec.BooleanValue ENABLE_INSTANT_SHELL_CONSTRUCTION;
-    private static final ForgeConfigSpec.BooleanValue WARN_PLAYER_INSTEAD_OF_KILLING;
+    private static final ModConfigSpec.BooleanValue ENABLE_INSTANT_SHELL_CONSTRUCTION;
+    private static final ModConfigSpec.BooleanValue WARN_PLAYER_INSTEAD_OF_KILLING;
 
     // Damage settings
-    private static final ForgeConfigSpec.DoubleValue FINGERSTICK_DAMAGE;
-    private static final ForgeConfigSpec.DoubleValue HARDCORE_FINGERSTICK_DAMAGE;
+    private static final ModConfigSpec.DoubleValue FINGERSTICK_DAMAGE;
+    private static final ModConfigSpec.DoubleValue HARDCORE_FINGERSTICK_DAMAGE;
 
     // Energy settings
-    private static final ForgeConfigSpec.LongValue SHELL_CONSTRUCTOR_CAPACITY;
-    private static final ForgeConfigSpec.LongValue SHELL_STORAGE_CAPACITY;
-    private static final ForgeConfigSpec.LongValue SHELL_STORAGE_CONSUMPTION;
+    private static final ModConfigSpec.LongValue SHELL_CONSTRUCTOR_CAPACITY;
+    private static final ModConfigSpec.LongValue SHELL_STORAGE_CAPACITY;
+    private static final ModConfigSpec.LongValue SHELL_STORAGE_CONSUMPTION;
 
     // Shell storage settings
-    private static final ForgeConfigSpec.BooleanValue SHELL_STORAGE_ACCEPTS_REDSTONE;
-    private static final ForgeConfigSpec.IntValue SHELL_STORAGE_MAX_UNPOWERED_LIFESPAN;
+    private static final ModConfigSpec.BooleanValue SHELL_STORAGE_ACCEPTS_REDSTONE;
+    private static final ModConfigSpec.IntValue SHELL_STORAGE_MAX_UNPOWERED_LIFESPAN;
 
     // Energy map
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> ENERGY_MAP;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> ENERGY_MAP;
 
     // Sync priority
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> SYNC_PRIORITY;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> SYNC_PRIORITY;
 
     // Tool settings
-    private static final ForgeConfigSpec.ConfigValue<String> WRENCH;
+    private static final ModConfigSpec.ConfigValue<String> WRENCH;
 
     // Misc settings
-    private static final ForgeConfigSpec.BooleanValue UPDATE_TRANSLATIONS_AUTOMATICALLY;
-    private static final ForgeConfigSpec.BooleanValue PRESERVE_ORIGINS;
+    private static final ModConfigSpec.BooleanValue UPDATE_TRANSLATIONS_AUTOMATICALLY;
+    private static final ModConfigSpec.BooleanValue PRESERVE_ORIGINS;
 
     // Technoblade easter egg
-    private static final ForgeConfigSpec.BooleanValue ENABLE_TECHNOBLADE_EASTER_EGG;
-    private static final ForgeConfigSpec.BooleanValue RENDER_TECHNOBLADE_CAPE;
-    private static final ForgeConfigSpec.BooleanValue ALLOW_TECHNOBLADE_ANNOUNCEMENTS;
-    private static final ForgeConfigSpec.BooleanValue ALLOW_TECHNOBLADE_QUOTES;
-    private static final ForgeConfigSpec.IntValue TECHNOBLADE_QUOTE_DELAY;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> TECHNOBLADE_UUIDS;
+    private static final ModConfigSpec.BooleanValue ENABLE_TECHNOBLADE_EASTER_EGG;
+    private static final ModConfigSpec.BooleanValue RENDER_TECHNOBLADE_CAPE;
+    private static final ModConfigSpec.BooleanValue ALLOW_TECHNOBLADE_ANNOUNCEMENTS;
+    private static final ModConfigSpec.BooleanValue ALLOW_TECHNOBLADE_QUOTES;
+    private static final ModConfigSpec.IntValue TECHNOBLADE_QUOTE_DELAY;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> TECHNOBLADE_UUIDS;
 
     // Cached values
     private static List<EnergyMapEntry> cachedEnergyMap = null;
@@ -390,11 +390,11 @@ public class SyncConfig {
 
         default EntityType<?> getEntityType() {
             ResourceLocation id = ResourceLocation.tryParse(this.entityId());
-            return id == null ? EntityType.PIG : ForgeRegistries.ENTITY_TYPES.getValue(id);
+            return id == null ? EntityType.PIG : BuiltInRegistries.ENTITY_TYPE.get(id);
         }
 
         static EnergyMapEntry of(EntityType<?> entityType, long outputEnergyQuantity) {
-            return of(ForgeRegistries.ENTITY_TYPES.getKey(entityType).toString(), outputEnergyQuantity);
+            return of(BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString(), outputEnergyQuantity);
         }
 
         static EnergyMapEntry of(String id, long outputEnergyQuantity) {

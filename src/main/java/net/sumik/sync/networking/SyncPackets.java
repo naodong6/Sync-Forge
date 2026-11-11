@@ -1,126 +1,108 @@
 package net.sumik.sync.networking;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.sumik.sync.Sync;
-import net.sumik.sync.api.networking.*;
+import net.sumik.sync.api.networking.ClientPlayerPacket;
+import net.sumik.sync.api.networking.PlayerIsAlivePacket;
+import net.sumik.sync.api.networking.ServerPlayerPacket;
+import net.sumik.sync.api.networking.ShellDestroyedPacket;
+import net.sumik.sync.api.networking.ShellStateUpdatePacket;
+import net.sumik.sync.api.networking.ShellUpdatePacket;
+import net.sumik.sync.api.networking.SynchronizationRequestPacket;
+import net.sumik.sync.api.networking.SynchronizationResponsePacket;
+
+import java.util.function.Supplier;
 
 public final class SyncPackets {
     private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(Sync.MOD_ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
 
-    private static int packetId = 0;
+    public static final CustomPacketPayload.Type<SynchronizationRequestPacket> SYNCHRONIZATION_REQUEST =
+            type("synchronization_request");
+    public static final CustomPacketPayload.Type<SynchronizationResponsePacket> SYNCHRONIZATION_RESPONSE =
+            type("synchronization_response");
+    public static final CustomPacketPayload.Type<ShellUpdatePacket> SHELL_UPDATE =
+            type("shell_update");
+    public static final CustomPacketPayload.Type<ShellStateUpdatePacket> SHELL_STATE_UPDATE =
+            type("shell_state_update");
+    public static final CustomPacketPayload.Type<PlayerIsAlivePacket> PLAYER_IS_ALIVE =
+            type("player_is_alive");
+    public static final CustomPacketPayload.Type<ShellDestroyedPacket> SHELL_DESTROYED =
+            type("shell_destroyed");
 
-    public static void init() {
-        CHANNEL.registerMessage(
-                packetId++,
-                SynchronizationRequestPacket.class,
-                (packet, buffer) -> packet.write(buffer),
-                buffer -> {
-                    SynchronizationRequestPacket packet = new SynchronizationRequestPacket();
-                    packet.read(buffer);
-                    return packet;
+    public static void register(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
+
+        registrar.playToServer(SYNCHRONIZATION_REQUEST,
+                codec(SynchronizationRequestPacket::new),
+                (packet, context) -> packet.handle(context));
+
+        registrar.playToClient(SYNCHRONIZATION_RESPONSE,
+                codec(SynchronizationResponsePacket::new),
+                (packet, context) -> packet.handle(context));
+        registrar.playToClient(SHELL_UPDATE,
+                codec(ShellUpdatePacket::new),
+                (packet, context) -> packet.handle(context));
+        registrar.playToClient(SHELL_STATE_UPDATE,
+                codec(ShellStateUpdatePacket::new),
+                (packet, context) -> packet.handle(context));
+        registrar.playToClient(PLAYER_IS_ALIVE,
+                codec(PlayerIsAlivePacket::new),
+                (packet, context) -> packet.handle(context));
+        registrar.playToClient(SHELL_DESTROYED,
+                codec(ShellDestroyedPacket::new),
+                (packet, context) -> packet.handle(context));
+    }
+
+    public static void sendToServer(CustomPacketPayload packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToPlayer(CustomPacketPayload packet, ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player, packet);
+    }
+
+    public static void sendToAllPlayers(CustomPacketPayload packet) {
+        PacketDistributor.sendToAllPlayers(packet);
+    }
+
+    public static void sendToAllTracking(CustomPacketPayload packet, LevelChunk chunk) {
+        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) chunk.getLevel(), chunk.getPos(), packet);
+    }
+
+    public static void sendToPlayersNear(CustomPacketPayload packet, ServerLevel world, double x, double y, double z, double radius) {
+        PacketDistributor.sendToPlayersNear(world, null, x, y, z, radius, packet);
+    }
+
+    private static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> type(String path) {
+        return new CustomPacketPayload.Type<>(Sync.locate(path));
+    }
+
+    private static <T extends CustomPacketPayload> StreamCodec<RegistryFriendlyByteBuf, T> codec(Supplier<T> factory) {
+        return CustomPacketPayload.codec(
+                (packet, buffer) -> {
+                    if (packet instanceof net.sumik.sync.api.networking.PlayerPacket playerPacket) {
+                        playerPacket.write(buffer);
+                    }
                 },
-                (packet, contextSupplier) -> packet.handle(contextSupplier.get())
+                buffer -> {
+                    T packet = factory.get();
+                    if (packet instanceof net.sumik.sync.api.networking.PlayerPacket playerPacket) {
+                        playerPacket.read(buffer);
+                    }
+                    return packet;
+                }
         );
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static void initClient() {
-        CHANNEL.registerMessage(
-                packetId++,
-                ShellUpdatePacket.class,
-                (packet, buffer) -> packet.write(buffer),
-                buffer -> {
-                    ShellUpdatePacket packet = new ShellUpdatePacket();
-                    packet.read(buffer);
-                    return packet;
-                },
-                (packet, contextSupplier) -> packet.handle(contextSupplier)
-        );
-
-        CHANNEL.registerMessage(
-                packetId++,
-                ShellStateUpdatePacket.class,
-                (packet, buffer) -> packet.write(buffer),
-                buffer -> {
-                    ShellStateUpdatePacket packet = new ShellStateUpdatePacket();
-                    packet.read(buffer);
-                    return packet;
-                },
-                (packet, contextSupplier) -> packet.handle(contextSupplier)
-        );
-
-        CHANNEL.registerMessage(
-                packetId++,
-                SynchronizationResponsePacket.class,
-                (packet, buffer) -> packet.write(buffer),
-                buffer -> {
-                    SynchronizationResponsePacket packet = new SynchronizationResponsePacket();
-                    packet.read(buffer);
-                    return packet;
-                },
-                (packet, contextSupplier) -> packet.handle(contextSupplier)
-        );
-
-        CHANNEL.registerMessage(
-                packetId++,
-                PlayerIsAlivePacket.class,
-                (packet, buffer) -> packet.write(buffer),
-                buffer -> {
-                    PlayerIsAlivePacket packet = new PlayerIsAlivePacket();
-                    packet.read(buffer);
-                    return packet;
-                },
-                (packet, contextSupplier) -> packet.handle(contextSupplier)
-        );
-
-        CHANNEL.registerMessage(
-                packetId++,
-                ShellDestroyedPacket.class,
-                (packet, buffer) -> packet.write(buffer),
-                buffer -> {
-                    ShellDestroyedPacket packet = new ShellDestroyedPacket();
-                    packet.read(buffer);
-                    return packet;
-                },
-                (packet, contextSupplier) -> packet.handle(contextSupplier)
-        );
-    }
-
-    /**
-     * Helper method to send a packet to the server
-     */
-    public static void sendToServer(Object packet) {
-        CHANNEL.sendToServer(packet);
-    }
-
-    /**
-     * Helper method to send a packet to a specific player
-     */
-    public static void sendToPlayer(Object packet, net.minecraft.server.level.ServerPlayer player) {
-        CHANNEL.send(net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player), packet);
-    }
-
-    /**
-     * Helper method to send a packet to all players
-     */
-    public static void sendToAllPlayers(Object packet) {
-        CHANNEL.send(net.minecraftforge.network.PacketDistributor.ALL.noArg(), packet);
-    }
-
-    /**
-     * Helper method to send a packet to all players tracking a chunk
-     */
-    public static void sendToAllTracking(Object packet, net.minecraft.world.level.chunk.LevelChunk chunk) {
-        CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_CHUNK.with(() -> chunk), packet);
+    private SyncPackets() {
     }
 }

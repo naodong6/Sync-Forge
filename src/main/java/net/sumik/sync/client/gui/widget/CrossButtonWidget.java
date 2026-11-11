@@ -1,8 +1,8 @@
 package net.sumik.sync.client.gui.widget;
 
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;

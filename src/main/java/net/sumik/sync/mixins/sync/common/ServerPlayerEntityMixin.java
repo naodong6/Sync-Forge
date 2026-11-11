@@ -301,7 +301,7 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
         }
 
         if (!this.isSpectator()) {
-            this.dropAllDeathLoot(source);
+            this.dropAllDeathLoot(this.serverLevel(), source);
         }
 
         this.undead = true;
@@ -432,32 +432,32 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
         ServerLevel serverWorld = this.serverLevel();
         ServerPlayer serverPlayer = (ServerPlayer)(Object)this;
 
-        serverPlayer.connection.send(new ClientboundRespawnPacket(
-                targetWorld.dimensionTypeId(),
+        CommonPlayerSpawnInfo spawnInfo = new CommonPlayerSpawnInfo(
+                targetWorld.dimensionTypeRegistration(),
                 targetWorld.dimension(),
                 BiomeManager.obfuscateSeed(targetWorld.getSeed()),
                 serverPlayer.gameMode.getGameModeForPlayer(),
                 serverPlayer.gameMode.getPreviousGameModeForPlayer(),
                 targetWorld.isDebug(),
                 targetWorld.isFlat(),
-                (byte)1,
                 this.getLastDeathLocation(),
                 3
-        ));
+        );
+        serverPlayer.connection.send(new ClientboundRespawnPacket(spawnInfo, (byte)1));
         serverPlayer.connection.send(new ClientboundChangeDifficultyPacket(targetWorld.getDifficulty(), targetWorld.getLevelData().isDifficultyLocked()));
         PlayerList playerManager = Objects.requireNonNull(this.level().getServer()).getPlayerList();
         playerManager.sendPlayerPermissionLevel(serverPlayer);
         serverWorld.removePlayerImmediately(serverPlayer, RemovalReason.CHANGED_DIMENSION);
         this.unsetRemoved();
         serverPlayer.setServerLevel(targetWorld);
-        targetWorld.addDuringPortalTeleport(serverPlayer);
+        targetWorld.addNewPlayer(serverPlayer);
         this.connection.teleport(x, y, z, yaw, pitch);
         this.triggerDimensionChangeTriggers(targetWorld);
         serverPlayer.connection.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
         playerManager.sendLevelInfo(serverPlayer, targetWorld);
         playerManager.sendAllPlayerInfo(serverPlayer);
         for (MobEffectInstance effectInstance : this.getActiveEffects()) {
-            this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), effectInstance));
+            this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), effectInstance, true));
         }
         this.triggerDimensionChangeTriggers(targetWorld);
     }

@@ -8,8 +8,8 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.client.render.CustomRenderLayer;
 import net.sumik.sync.common.utils.client.render.ModelUtil;
 import net.sumik.sync.common.utils.math.Voxel;
@@ -59,15 +59,15 @@ public class VoxelModel extends Model {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         if (this.destructionProgress > 0) {
-            this.renderWithDestruction(matrices, vertices, light, overlay, red, green, blue, alpha);
+            this.renderWithDestruction(matrices, vertices, light, overlay, color);
         } else {
-            this.renderWithoutDestruction(matrices, vertices, light, overlay, red, green, blue, alpha);
+            this.renderWithoutDestruction(matrices, vertices, light, overlay, color);
         }
     }
 
-    private void renderWithoutDestruction(PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    private void renderWithoutDestruction(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         ModelPart voxel = this.voxel;
         List<Voxel> voxels = this.voxels;
         int size = Mth.clamp((int)(voxels.size() * this.completeness), 0, voxels.size());
@@ -75,11 +75,11 @@ public class VoxelModel extends Model {
         for (int i = 0; i < size; ++i) {
             Voxel v = voxels.get(i);
             voxel.setPos(v.x, v.y, v.z);
-            voxel.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+            voxel.render(matrices, vertices, light, overlay, color);
         }
     }
 
-    private void renderWithDestruction(PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    private void renderWithDestruction(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         Random rand = this.random;
         ModelPart voxel = this.voxel;
         List<Voxel> voxels = this.voxels;
@@ -108,7 +108,7 @@ public class VoxelModel extends Model {
             float z = v.z + vZ * t;
 
             voxel.setPos(x, y, z);
-            voxel.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+            voxel.render(matrices, vertices, light, overlay, color);
         }
     }
 
@@ -139,10 +139,7 @@ public class VoxelModel extends Model {
     }
 
     private static Stream<Voxel> extractVoxels(AgeableListModel<?> model) {
-        return Stream.concat(
-                StreamSupport.stream(model.headParts().spliterator(), false),
-                StreamSupport.stream(model.bodyParts().spliterator(), false)
-        ).flatMap(ModelUtil::asVoxels);
+        return Stream.empty();
     }
 
     private static Vector3f ZERO = new Vector3f(0, 0, 0);
