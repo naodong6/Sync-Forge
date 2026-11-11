@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.sumik.sync.Sync;
+import net.sumik.sync.api.event.PlayerSyncEvents;
 import net.sumik.sync.api.shell.ServerShell;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.api.shell.ShellStateContainer;
@@ -72,14 +73,17 @@ public class SynchronizationRequestPacket implements ServerPlayerPacket {
         ResourceLocation currentWorldId = WorldUtil.getId(currentWorld);
         Direction currentFacing = BlockPosUtil.getHorizontalFacing(currentPos, currentWorld).orElse(player.getDirection().getOpposite());
 
-        shell.sync(state).ifLeft(storedState -> {
+        ServerShell.SyncResult result = shell.sync(state);
+        if (result.isSuccess()) {
+            ShellState storedState = result.storedState();
             Objects.requireNonNull(state);
             ResourceLocation targetWorldId = state.getWorld();
             BlockPos targetPos = state.getPos();
             Direction targetFacing = player.getDirection().getOpposite();
             new SynchronizationResponsePacket(currentWorldId, currentPos, currentFacing, targetWorldId, targetPos, targetFacing, storedState).send(player);
-        }).ifRight(failureReason -> {
+        } else {
+            PlayerSyncEvents.SyncFailureReason failureReason = Objects.requireNonNull(result.failureReason());
             player.sendSystemMessage(failureReason.toText());
             new SynchronizationResponsePacket(currentWorldId, currentPos, currentFacing, currentWorldId, currentPos, currentFacing, null).send(player);
-        });
+        }
     }}

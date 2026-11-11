@@ -19,6 +19,7 @@ import net.sumik.sync.api.shell.ShellPriority;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.client.gui.controller.DeathScreenController;
 import net.sumik.sync.client.gui.hud.HudController;
+import net.sumik.sync.common.compat.SecondWindCompat;
 import net.sumik.sync.common.entity.KillableEntity;
 import net.sumik.sync.common.entity.LookingEntity;
 import net.sumik.sync.common.entity.PersistentCameraEntity;
@@ -193,6 +194,10 @@ public abstract class  ClientPlayerEntityMixin extends AbstractClientPlayer impl
 
     @Override
     public void onKillableEntityDeath() {
+        if (SecondWindCompat.isLoaded()) {
+            return;
+        }
+
         if (this.clientLevel.getLevelData().isHardcore()) {
             return;
         }

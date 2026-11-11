@@ -1,8 +1,8 @@
 package net.sumik.sync.api.shell;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.server.MinecraftServer;
 import net.sumik.sync.api.event.PlayerSyncEvents;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -11,6 +11,20 @@ import java.util.UUID;
  * Server-side version of the {@link Shell}.
  */
 public interface ServerShell extends Shell {
+    record SyncResult(@Nullable ShellState storedState, @Nullable PlayerSyncEvents.SyncFailureReason failureReason) {
+        public boolean isSuccess() {
+            return this.failureReason == null;
+        }
+
+        public static SyncResult success(@Nullable ShellState storedState) {
+            return new SyncResult(storedState, null);
+        }
+
+        public static SyncResult failure(PlayerSyncEvents.SyncFailureReason failureReason) {
+            return new SyncResult(null, failureReason);
+        }
+    }
+
     @Override
     default boolean isClient() {
         return false;
@@ -22,7 +36,7 @@ public interface ServerShell extends Shell {
      * @param state Target state.
      * @return New state that was generated during the sync process, if it was successful; otherwise, failure reason is returned.
      */
-    Either<ShellState, PlayerSyncEvents.SyncFailureReason> sync(ShellState state);
+    SyncResult sync(ShellState state);
 
     /**
      * Modifies the internal state of the shell to match the specified one.

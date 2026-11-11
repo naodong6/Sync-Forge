@@ -1,7 +1,6 @@
 package net.sumik.sync.mixins.sync.common;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -33,6 +32,7 @@ import net.sumik.sync.api.networking.ShellStateUpdatePacket;
 import net.sumik.sync.api.networking.ShellUpdatePacket;
 import net.sumik.sync.api.networking.SynchronizationResponsePacket;
 import net.sumik.sync.api.shell.*;
+import net.sumik.sync.common.compat.SecondWindCompat;
 import net.sumik.sync.common.entity.KillableEntity;
 import net.sumik.sync.common.utils.BlockPosUtil;
 import net.sumik.sync.common.utils.WorldUtil;
@@ -105,43 +105,43 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
     }
 
     @Override
-    public Either<ShellState, PlayerSyncEvents.SyncFailureReason> sync(ShellState state) {
+    public ServerShell.SyncResult sync(ShellState state) {
         ServerPlayer player = (ServerPlayer)(Object)this;
         BlockPos currentPos = this.blockPosition();
         Level currentWorld = player.level();
 
         if (!this.canBeApplied(state) || state.getProgress() < ShellState.PROGRESS_DONE) {
-            return Either.right(PlayerSyncEvents.SyncFailureReason.INVALID_SHELL);
+            return ServerShell.SyncResult.failure(PlayerSyncEvents.SyncFailureReason.INVALID_SHELL);
         }
 
         boolean isDead = this.isDeadOrDying();
         ShellStateContainer currentShellContainer = isDead ? null : ShellStateContainer.find(currentWorld, currentPos);
         if (!isDead && (currentShellContainer == null || currentShellContainer.getShellState() != null)) {
-            return Either.right(PlayerSyncEvents.SyncFailureReason.INVALID_CURRENT_LOCATION);
+            return ServerShell.SyncResult.failure(PlayerSyncEvents.SyncFailureReason.INVALID_CURRENT_LOCATION);
         }
 
         PlayerSyncEvents.ShellSelectionFailureReason selectionFailureReason = PlayerSyncEvents.ALLOW_SHELL_SELECTION.invoker().allowShellSelection(player, currentShellContainer);
         if (selectionFailureReason != null) {
-            return Either.right(selectionFailureReason::toText);
+            return ServerShell.SyncResult.failure(selectionFailureReason::toText);
         }
 
         ResourceLocation targetWorldId = state.getWorld();
         ServerLevel targetWorld = WorldUtil.findWorld(this.server.getAllLevels(), targetWorldId).orElse(null);
         if (targetWorld == null) {
-            return Either.right(PlayerSyncEvents.SyncFailureReason.INVALID_TARGET_LOCATION);
+            return ServerShell.SyncResult.failure(PlayerSyncEvents.SyncFailureReason.INVALID_TARGET_LOCATION);
         }
 
         BlockPos targetPos = state.getPos();
         LevelChunk targetChunk = targetWorld.getChunk(targetPos.getX() >> 4, targetPos.getZ() >> 4);
         ShellStateContainer targetShellContainer = targetChunk == null ? null : ShellStateContainer.find(targetWorld, targetPos);
         if (targetShellContainer == null) {
-            return Either.right(PlayerSyncEvents.SyncFailureReason.INVALID_TARGET_LOCATION);
+            return ServerShell.SyncResult.failure(PlayerSyncEvents.SyncFailureReason.INVALID_TARGET_LOCATION);
         }
 
         state = targetShellContainer.getShellState();
         PlayerSyncEvents.SyncFailureReason finalFailureReason = this.canBeApplied(state) ? PlayerSyncEvents.ALLOW_SYNCING.invoker().allowSync(this, state) : PlayerSyncEvents.SyncFailureReason.INVALID_SHELL;
         if (finalFailureReason != null) {
-            return Either.right(finalFailureReason);
+            return ServerShell.SyncResult.failure(finalFailureReason);
         }
 
         PlayerSyncEvents.START_SYNCING.invoker().onStartSyncing(this, state);
@@ -160,7 +160,7 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
         this.apply(state);
 
         PlayerSyncEvents.STOP_SYNCING.invoker().onStopSyncing(player, currentPos, storedState);
-        return Either.left(storedState);
+        return ServerShell.SyncResult.success(storedState);
     }
 
     @Override
@@ -288,16 +288,25 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
             return;
         }
 
-        if (this.server.isHardcore()) {
+        boolean secondWindLoaded = SecondWindCompat.isLoaded();
+        if (secondWindLoaded && SecondWindCompat.canTriggerSecondWind(player, source)) {
+            return;
+        }
+
+        boolean secondWindFallback = secondWindLoaded && !player.isCreative() && !player.isSpectator();
+        if (this.server.isHardcore() || secondWindFallback) {
             BlockPos startPos = this.blockPosition();
             ResourceLocation startWorldId = WorldUtil.getId(this.level());
             Direction startFacing = BlockPosUtil.getHorizontalFacing(startPos, this.level()).orElse(this.getDirection().getOpposite());
-            Either<ShellState, PlayerSyncEvents.SyncFailureReason> result = this.sync(respawnShell);
-            if (result.left().isPresent()) {
-                ShellState storedState = result.left().get();
+            ServerShell.SyncResult result = this.sync(respawnShell);
+            if (result.isSuccess()) {
+                ShellState storedState = result.storedState();
                 Direction targetFacing = this.getDirection().getOpposite();
                 new SynchronizationResponsePacket(startWorldId, startPos, startFacing,
                         respawnShell.getWorld(), respawnShell.getPos(), targetFacing, storedState).send(player);
+                if (secondWindLoaded) {
+                    SecondWindCompat.resetAfterSync(player);
+                }
                 this.sendDeathMessageInChat();
                 ci.cancel();
                 return;
