@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.scores.Team;
+import net.neoforged.fml.ModList;
 import net.sumik.sync.api.event.PlayerSyncEvents;
 import net.sumik.sync.api.networking.PlayerIsAlivePacket;
 import net.sumik.sync.api.networking.ShellStateUpdatePacket;
@@ -52,6 +53,9 @@ import java.util.stream.Stream;
 
 @Mixin(ServerPlayer.class)
 abstract class ServerPlayerEntityMixin extends Player implements ServerShell, KillableEntity {
+    @Unique
+    private static final String CORPSE_MOD_ID = "corpse";
+
     @Shadow
     private int lastSentExp;
 
@@ -75,6 +79,9 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
 
     @Unique
     private boolean undead = false;
+
+    @Unique
+    private DamageSource pendingSynchronizationDeathSource;
 
     @Unique
     private ConcurrentMap<UUID, ShellState> shellsById = new ConcurrentHashMap<>();
@@ -145,6 +152,12 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
         }
 
         PlayerSyncEvents.START_SYNCING.invoker().onStartSyncing(this, state);
+
+        // Sync normally bypasses ServerPlayer.die, so let Corpse observe the drops first.
+        if (isDead && this.pendingSynchronizationDeathSource != null && ModList.get().isLoaded(CORPSE_MOD_ID)) {
+            this.dropAllDeathLoot(this.serverLevel(), this.pendingSynchronizationDeathSource);
+            this.pendingSynchronizationDeathSource = null;
+        }
 
         ShellState storedState = null;
         if (currentShellContainer != null) {
@@ -298,7 +311,13 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
             BlockPos startPos = this.blockPosition();
             ResourceLocation startWorldId = WorldUtil.getId(this.level());
             Direction startFacing = BlockPosUtil.getHorizontalFacing(startPos, this.level()).orElse(this.getDirection().getOpposite());
-            ServerShell.SyncResult result = this.sync(respawnShell);
+            ServerShell.SyncResult result;
+            this.pendingSynchronizationDeathSource = source;
+            try {
+                result = this.sync(respawnShell);
+            } finally {
+                this.pendingSynchronizationDeathSource = null;
+            }
             if (result.isSuccess()) {
                 ShellState storedState = result.storedState();
                 Direction targetFacing = this.getDirection().getOpposite();
