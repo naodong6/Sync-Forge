@@ -16,6 +16,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.sumik.sync.api.shell.ShellState;
 import net.sumik.sync.client.model.ShellModel;
+import net.sumik.sync.client.render.MatrixStackStorage;
 import net.sumik.sync.common.block.entity.ShellEntity;
 
 @OnlyIn(Dist.CLIENT)
@@ -44,6 +45,7 @@ public class ShellEntityRenderer extends PlayerRenderer {
             poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
 
             this.applyStateToModel(this.shellModel, shell.getState());
+            MatrixStackStorage.saveModelMatrixStack(poseStack);
             VertexConsumer vertexConsumer = this.getVertexConsumerForPartiallyTexturedEntity(shell, progress, this.shellModel.getLayer(player.getSkin().texture()), bufferSource);
             this.shellModel.renderToBuffer(poseStack, vertexConsumer, packedLight, getOverlayCoords(player, 0), -1);
 

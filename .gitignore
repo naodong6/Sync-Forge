@@ -36,6 +36,8 @@ runs/
 run-client/
 run-server/
 logs/
+.mixin.out/
+config/
 
 # generated data
 
