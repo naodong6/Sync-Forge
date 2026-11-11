@@ -3,6 +3,7 @@ package net.sumik.sync.mixins.sync.common;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -30,6 +31,7 @@ import net.sumik.sync.api.event.PlayerSyncEvents;
 import net.sumik.sync.api.networking.PlayerIsAlivePacket;
 import net.sumik.sync.api.networking.ShellStateUpdatePacket;
 import net.sumik.sync.api.networking.ShellUpdatePacket;
+import net.sumik.sync.api.networking.SynchronizationResponsePacket;
 import net.sumik.sync.api.shell.*;
 import net.sumik.sync.common.entity.KillableEntity;
 import net.sumik.sync.common.utils.BlockPosUtil;
@@ -280,12 +282,29 @@ abstract class ServerPlayerEntityMixin extends Player implements ServerShell, Ki
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void onDeath(DamageSource source, CallbackInfo ci) {
-        if (!this.isArtificial) {
+        ServerPlayer player = (ServerPlayer)(Object)this;
+        ShellState respawnShell = this.shellsById.values().stream().filter(x -> this.canBeApplied(x) && x.getProgress() >= ShellState.PROGRESS_DONE).findAny().orElse(null);
+        if (respawnShell == null) {
             return;
         }
 
-        ShellState respawnShell = this.shellsById.values().stream().filter(x -> this.canBeApplied(x) && x.getProgress() >= ShellState.PROGRESS_DONE).findAny().orElse(null);
-        if (respawnShell == null) {
+        if (this.server.isHardcore()) {
+            BlockPos startPos = this.blockPosition();
+            ResourceLocation startWorldId = WorldUtil.getId(this.level());
+            Direction startFacing = BlockPosUtil.getHorizontalFacing(startPos, this.level()).orElse(this.getDirection().getOpposite());
+            Either<ShellState, PlayerSyncEvents.SyncFailureReason> result = this.sync(respawnShell);
+            if (result.left().isPresent()) {
+                ShellState storedState = result.left().get();
+                Direction targetFacing = this.getDirection().getOpposite();
+                new SynchronizationResponsePacket(startWorldId, startPos, startFacing,
+                        respawnShell.getWorld(), respawnShell.getPos(), targetFacing, storedState).send(player);
+                this.sendDeathMessageInChat();
+                ci.cancel();
+                return;
+            }
+        }
+
+        if (!this.isArtificial) {
             return;
         }
 

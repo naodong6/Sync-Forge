@@ -1,0 +1,31 @@
+{
+  "creativetab.sync": "Sync（同步）",
+
+  "block.sync.shell_storage": "躯壳存储器",
+  "block.sync.shell_constructor": "躯壳构造器",
+  "block.sync.treadmill": "跑步机",
+
+  "item.sync.sync_core": "同步核心",
+
+  "death.attack.sync.fingerstick": "%s 为科学献出了生命",
+
+  "command.sync.ghostshells.invalid_action": "可用操作：sync、remove、repair",
+  "command.sync.ghostshells.not_found": "%s 没有位于 %s 的躯壳记录",
+  "command.sync.ghostshells.repaired": "已成功修复 %s 位于 %s 的躯壳",
+  "command.sync.ghostshells.failed": "无法修复 %s 位于 %s 的躯壳，该坐标没有躯壳容器",
+  "command.sync.ghostshells.removed": "已从 %1$s 的径向菜单中移除躯壳（%2$s）",
+
+  "event.sync.request.fail.invalid.shell": "所选躯壳不属于当前玩家",
+  "event.sync.request.fail.invalid.location.current": "无法在当前地点开始同步",
+  "event.sync.request.fail.invalid.location.target": "找不到所选躯壳",
+  "event.sync.construction.fail.health": "你的生命值不足以执行此操作",
+  "event.sync.construction.fail.occupied": "该躯壳容器已被占用",
+  "event.sync.any.fail.undead": "亡灵状态下的玩家无法执行此操作",
+
+  "gui.sync.default.cross_button.title": "关闭",
+  "gui.sync.shell_selector.title": "躯壳选择器",
+  "gui.sync.shell_selector.up.title": "上一个世界",
+  "gui.sync.shell_selector.down.title": "下一个世界",
+  "gui.sync.shell_selector.left.title": "上一页",
+  "gui.sync.shell_selector.right.title": "下一页"
+}

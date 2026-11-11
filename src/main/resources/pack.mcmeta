@@ -1,6 +1,10 @@
 {
     "pack": {
         "pack_format": 34,
+        "supported_formats": [
+            0,
+            2147483647
+        ],
         "description": "Sync NeoForge 1.21.1 resources"
     }
 }

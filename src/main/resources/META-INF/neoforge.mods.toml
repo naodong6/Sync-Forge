@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/VTSumik/Sync-Forge/issues"
 
 [[mods]]
 modId="sync"
-version="0.2.2"
+version="0.2.3"
 displayName="Sync"
 authors="Sumiku"
 description='''One mind. Many bodies.'''

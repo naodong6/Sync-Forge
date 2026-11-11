@@ -23,6 +23,6 @@
     }
   },
   "result": {
-    "item": "sync:shell_storage"
+    "id": "sync:shell_storage"
   }
 }

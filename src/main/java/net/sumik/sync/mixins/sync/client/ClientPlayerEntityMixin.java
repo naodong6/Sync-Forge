@@ -99,6 +99,8 @@ public abstract class  ClientPlayerEntityMixin extends AbstractClientPlayer impl
         boolean syncFailed = Objects.equals(startPos, targetPos);
 
         if (!syncFailed) {
+            this.minecraft.setScreen(null);
+            HudController.hide();
             if (this.getHealth() <= 0) {
                 this.setHealth(0.01F);
             }
@@ -191,6 +193,10 @@ public abstract class  ClientPlayerEntityMixin extends AbstractClientPlayer impl
 
     @Override
     public void onKillableEntityDeath() {
+        if (this.clientLevel.getLevelData().isHardcore()) {
+            return;
+        }
+
         boolean canRespawn = this.sync$shellsById.values().stream()
                 .anyMatch(s -> this.canBeApplied(s) && s.getProgress() >= ShellState.PROGRESS_DONE);
         BlockPos pos = this.blockPosition();
